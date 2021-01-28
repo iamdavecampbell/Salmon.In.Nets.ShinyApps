@@ -49,17 +49,9 @@ shinyUI(fluidPage(
                         max = 2,
                         value = 1.1,
                         step = .01),
-            p("However, fish smaller than this many lbs are not viable and will not survive the salmon migration"),
-            sliderInput("minimumViable",
-                        "",
-                        min = 1,
-                        max=4,
-                        value = 1,
-                        step=.25),
             submitButton("Submit")
             
     ),
-
 
 
         # Show a plot of the generated distribution
@@ -78,7 +70,7 @@ shinyUI(fluidPage(
             plotOutput("distPlot"),
             p("Notice how the distribution of fish sizes shrinks well below the gill-net size. Smaller fish are more successful against the nets."),
             h3("limitations"),
-            p("Fish may have better survival rates in the ocean if they are larger, but the current model imposes a strict minimum size for viability of fish."),
+            p("Fish may have better survival rates in the ocean if they are larger, but the current model does not consider upwards pressure in size."),
 
         )
     )

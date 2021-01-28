@@ -33,7 +33,7 @@ shinyServer(function(input, output) {
             EncounterNet = runif(length(LivingFishSize))<input$P.net.encounter ###### FROM INPUT
             SurviveIfInNet = LivingFishSize<input$NetSize         #fish this size or larger get caught if they encounter the net
             Fish.At.Last.Gen = data.frame(LivingFishSize, EncounterNet, SurviveIfInNet)
-            Fish.Parents.For.Next.Gen = Fish.At.Last.Gen%>% filter((EncounterNet==FALSE | (EncounterNet ==TRUE & SurviveIfInNet ==TRUE) )& LivingFishSize>input$minimumViable)%>%
+            Fish.Parents.For.Next.Gen = Fish.At.Last.Gen%>% filter(EncounterNet==FALSE | (EncounterNet ==TRUE & SurviveIfInNet ==TRUE) & LivingFishSize>0)%>%
                                         dplyr::select(LivingFishSize)
             #this ensures that only survivors can reproduce and that the population stays constant in count.
             Fish.Parents.For.Next.Gen.Size = Fish.Parents.For.Next.Gen[sample(1:nrow(Fish.Parents.For.Next.Gen),
