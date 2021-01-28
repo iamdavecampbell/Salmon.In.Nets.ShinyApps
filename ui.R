@@ -22,8 +22,13 @@ shinyUI(fluidPage(
                         "Generations Of Fish:",
                         min = 1,
                         max = 20,
-                        value = 1)
-        ),
+                        value = 2),
+            sliderInput("P.net.encounter",
+                        "Net coverage of the river:",
+                        min = 0,
+                        max = 1,
+                        value = .01)
+    ),
 
 
         # Show a plot of the generated distribution
@@ -31,4 +36,5 @@ shinyUI(fluidPage(
             plotOutput("distPlot")
         )
     )
-))
+)
+)
