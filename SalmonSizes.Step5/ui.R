@@ -18,6 +18,8 @@ shinyUI(fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
+            HTML("View the code on <a href='https://github.com/iamdavecampbell/Salmon.In.Nets.ShinyApps' target = '_blank'>Github</a>"),
+            HTML("<h1>Model Building</h1>"),
             p("Beginning with a population of size:"),
             
             numericInput("initialPopulationSize", "", 10000, 1000, 20000, 1000),
@@ -49,16 +51,27 @@ shinyUI(fluidPage(
                         max = 2,
                         value = 1.1,
                         step = .01),
-            submitButton("Submit")
+            submitButton("Submit"),
+            h3("Author"),
+            HTML('
+        <div style="clear: left;">
+        <img src="https://people.math.carleton.ca/~davecampbell/Dave_Campbell_files/shapeimage_5.png" alt="" style="height: 274px; width: 204px; "> </div>
+        <p>
+        <a href="https://people.math.carleton.ca/~davecampbell/Dave_Campbell.html" target="_blank">Dr. Dave Campbell</a><br>
+        Professor, School of Mathematics and Statistics<br>
+        Carleton University<br>
+        <a href="https://twitter.com/iamdavecampbell" target="_blank">Twitter</a><br>
+        <a href="http://ca.linkedin.com/pub/dave-campbell/38/44/a84" target="_blank">Linkedin</a> <br/>
+        </p>')
+            
             
     ),
 
 
         # Show a plot of the generated distribution
         mainPanel(
-            
-            
-            p("Salmon, starting with an initial population of size"), textOutput("initialPopulationSize"),
+              
+              p("Salmon, starting with an initial population of size"), textOutput("initialPopulationSize"),
             p("and size distribution (darkest line below), encounter gill-nets across a river with probability "), textOutput("P.net.encounter"),
             p("Some fish will swim around the nets, but some fish encounter the nets.  
               Fish bigger than the size of the holes in the net will get caught and will not survive to reproduce.
@@ -74,10 +87,11 @@ shinyUI(fluidPage(
             # plotOutput("Biomass"),
             # plotOutput("Caughtmass"),
             p("Notice how the distribution of fish sizes shrinks well below the gill-net size. Smaller fish are more successful against the nets."),
-            h3("limitations"),
+            h3("Limitations"),
             p("Fish may have better survival rates in the ocean if they are larger, but the current model does not consider upwards pressure in size."),
             p("Fish fry are normally distributed around the mean of their parent (there is no mixing of male and female fish to produce offspring).  The standard deviation of the fish fry is 1."),
-
+            
+            
         )
     )
 )
