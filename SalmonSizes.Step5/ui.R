@@ -76,7 +76,7 @@ shinyUI(fluidPage(
             p("Some fish will swim around the nets, but some fish encounter the nets.  
               Fish bigger than the size of the holes in the net will get caught and will not survive to reproduce.
               Smaller fish will swim through the holes in the gill-net and spawn an average of"), textOutput("reproduction.rate"),
-            p("fish who survive to the next generation.  Fish fry will be similar in size to their parents, but the size of the fry are random."),
+            p("fish who survive to the next generation.  Fish fry will be similar in size to their parents, but the size of the fry are normally distributed around the size of the parent with standard deviation 1."),
             radioButtons("Density.Plot.Indicator", "",
                          c("plot normalized densities" = 1,
                            "plot frequencies per 0.02 lb window" = 0)),
