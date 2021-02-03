@@ -71,6 +71,7 @@ shinyUI(fluidPage(
             p("Notice how the distribution of fish sizes shrinks well below the gill-net size. Smaller fish are more successful against the nets."),
             h3("limitations"),
             p("Fish may have better survival rates in the ocean if they are larger, but the current model does not consider upwards pressure in size."),
+            p("Fish fry are normally distributed around the mean of their parent (there is no mixing of male and female fish to produce offspring).  The standard deviation of the fish fry is 1."),
 
         )
     )
