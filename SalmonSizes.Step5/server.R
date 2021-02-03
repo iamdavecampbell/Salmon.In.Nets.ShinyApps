@@ -70,6 +70,7 @@ shinyServer(function(input, output) {
 
         PopPlot = data.frame(generation = 1:T, Population.Count = Npop, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) %>%
             ggplot( aes(x = generation, y = Population.Count )) +
+            geom_line(,colour="blue")+
             geom_point()+
             ggtitle("Population count")+
             labs(y = "Generation",x="Total fish population count")
@@ -77,17 +78,23 @@ shinyServer(function(input, output) {
         
         Biomass = data.frame(generation = 1:T, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) %>%
             ggplot( aes(x = generation)) +
+            geom_line(aes( y = SurvivingBiomass ),colour="blue")+
             geom_point(aes( y = SurvivingBiomass ))+
             ggtitle("Total mass of fish remaining for next generation")+
             labs(y = "Generation",x="Surviving fish biomass")
         
+        Caughtmass = data.frame(generation = 1:T, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) %>%
+            ggplot( aes(x = generation)) +
+            geom_line(aes( y = CaughtBiomass ),colour="blue")+
+            geom_point(aes( y = CaughtBiomass ))+
+            ggtitle("Total mass of fish caught in the Gill-net in each time step")+
+            labs(y = "Generation",x="Biomass of caught fish")
         
-        
-        ggarrange(DensPlot, PopPlot, Biomass,ncol = 1, nrow = 3)
-        
-        
-        
-        
+        # output$DensPlot = renderPlot({DensPlot})
+        # output$PopPlot = renderPlot({PopPlot})
+        # output$Biomass = renderPlot({Biomass})    
+        ggarrange(DensPlot,PopPlot,Biomass, Caughtmass,nrow = 2,ncol=2)
     })
+    
 
 })
