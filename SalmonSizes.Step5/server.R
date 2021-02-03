@@ -9,9 +9,6 @@
 
 library(shiny)
 library(tidyverse)
-# require(gridExtra,lib.loc="/srv/shiny-server/dave-apps/Impact of Fishing Gear on Salmon Size")
-# require(ggpubr,lib.loc="/srv/shiny-server/dave-apps/Impact of Fishing Gear on Salmon Size")
-library(gridExtra)
 
 shinyServer(function(input, output) {
 
@@ -102,26 +99,7 @@ shinyServer(function(input, output) {
                     labs(y = "Generation",x="Surviving fish biomass")
                 })
         
-        # 
-        # output$Biomass = renderPlot({
-        #     plots2make()$ByGen%>%
-        #     ggplot( aes(x = generation)) +
-        #     geom_line(aes( y = SurvivingBiomass ),colour="blue")+
-        #     geom_point(aes( y = SurvivingBiomass ))+
-        #     ggtitle("Total mass of fish remaining for next generation")+
-        #     labs(y = "Generation",x="Surviving fish biomass")
-        # })
-        # 
-        # output$Caughtmass = renderPlot({
-        #     plots2make()$ByGen%>%
-        #     ggplot( aes(x = generation)) +
-        #     geom_line(aes( y = CaughtBiomass ),colour="blue")+
-        #     geom_point(aes( y = CaughtBiomass ))+
-        #     ggtitle("Total mass of fish caught in the Gill-net in each time step")+
-        #     labs(y = "Generation",x="Biomass of caught fish")
-        # })
-    
-    # })
+      
     
 
 })
