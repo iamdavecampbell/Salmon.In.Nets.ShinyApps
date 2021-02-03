@@ -9,7 +9,9 @@
 
 library(shiny)
 library(tidyverse)
-library(ggpubr)
+# require(gridExtra,lib.loc="/srv/shiny-server/dave-apps/Impact of Fishing Gear on Salmon Size")
+# require(ggpubr,lib.loc="/srv/shiny-server/dave-apps/Impact of Fishing Gear on Salmon Size")
+library(gridExtra)
 
 shinyServer(function(input, output) {
 
@@ -19,8 +21,7 @@ shinyServer(function(input, output) {
     
     output$reproduction.rate <- renderText({ input$reproduction.rate })
     
-    
-    output$distPlot <- renderPlot({
+    plots2make = reactive({
         N = input$initialPopulationSize # number of fish to start
         T = input$generations # generaions
         FishSizeSD = 1        #sd for fish
@@ -32,16 +33,16 @@ shinyServer(function(input, output) {
         CaughtBiomass= rep(NA, T)
         SurvivingBiomass= c(sum(LivingFishSize), rep(NA, T-1))
         for(generation in 2:T){
-
+            
             EncounterNet = runif(length(LivingFishSize))<input$P.net.encounter ###### FROM INPUT
             SurviveIfInNet = LivingFishSize<input$NetSize         #fish this size or larger get caught if they encounter the net
             
-                
+            
             Fish.At.Last.Gen = data.frame(LivingFishSize, EncounterNet, SurviveIfInNet)
-            CaughtBiomass[generation] =  Fish.At.Last.Gen%>% filter(EncounterNet ==TRUE & SurviveIfInNet ==FALSE & LivingFishSize>0)%>%
+            CaughtBiomass[generation-1] =  Fish.At.Last.Gen%>% filter(EncounterNet ==TRUE & SurviveIfInNet ==FALSE & LivingFishSize>0)%>%
                 dplyr::select(LivingFishSize) %>% sum() #total mass of caught fish
             Fish.Parents.For.Next.Gen = Fish.At.Last.Gen%>% filter(EncounterNet==FALSE | (EncounterNet ==TRUE & SurviveIfInNet ==TRUE) & LivingFishSize>0)%>%
-                                        dplyr::select(LivingFishSize)
+                dplyr::select(LivingFishSize)
             #this ensures that only survivors can reproduce and that the population stays constant in count.
             Fish.Parents.For.Next.Gen.Size = Fish.Parents.For.Next.Gen[sample(1:nrow(Fish.Parents.For.Next.Gen),
                                                                               size=rpois(n=1,lambda=nrow(Fish.Parents.For.Next.Gen)*input$reproduction.rate),
@@ -49,52 +50,78 @@ shinyServer(function(input, output) {
             Npop[generation] = length(Fish.Parents.For.Next.Gen.Size)
             LivingFishSize = rnorm(Npop[generation],mean = Fish.Parents.For.Next.Gen.Size, sd = FishSizeSD)
             FishDensityThatWeKeep[,generation] = density(LivingFishSize, from = 0, to = 10)$y*
-                                      (as.numeric(input$Density.Plot.Indicator)*(Npop[generation]-1)+1)
+                (as.numeric(input$Density.Plot.Indicator)*(Npop[generation]-1)+1)
             SurvivingBiomass[generation] = sum(LivingFishSize)
-                
+            
         }
         # Add in the x values to go with the density
-        FishDensityThatWeKeep  = as_tibble(FishDensityThatWeKeep) %>% mutate(fishmass = density(LivingFishSize, from = 0, to = 10)$x)
-
-        ylabel=c("Frequency","Density")
+        FishDensityThatWeKeep  = as_tibble(FishDensityThatWeKeep) %>% mutate(fishmass = density(LivingFishSize, from = 0, to = 10)$x)%>% 
+            gather(key = Generation,
+            value = DensityOfMass,
+          -fishmass)
         
-        DensPlot = FishDensityThatWeKeep %>% gather(key = Generation,
-                                                value = DensityOfMass,
-                                                -fishmass) %>%
+        ByGen = data.frame(generation = 1:T, Population.Count = Npop, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) 
+        
+        return(list(FishDensityThatWeKeep=FishDensityThatWeKeep,ByGen=ByGen))
+    })
+    
+        
+        
+        output$DensPlot = renderPlot({
+            ylabel=c("Frequency","Density")
+            plots2make()$FishDensityThatWeKeep%>%
             mutate(Generation = as.numeric(gsub(Generation,pattern = "Gen.",replacement = "")))%>%
-        ggplot( aes(x = fishmass, y = DensityOfMass, colour = Generation )) +
+            ggplot( aes(x = fishmass, y = DensityOfMass, colour = Generation )) +
             geom_point()+
             geom_vline(xintercept = input$NetSize, lwd=3,col="red")+
-            ggtitle(paste0("Distribution of salmon weight in each generation after responding to Gill-net pressure\n final population size:", Npop[T]))+
+            ggtitle("Distribution of salmon weight in each generation after responding to Gill-net pressure")+
             labs(y = ylabel[1+as.numeric(input$Density.Plot.Indicator)],x="weight of fish in lbs")
+        })
+        
+        
+        
 
-        PopPlot = data.frame(generation = 1:T, Population.Count = Npop, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) %>%
+        output$PopPlot = renderPlot({
+            plots2make()$ByGen %>%
             ggplot( aes(x = generation, y = Population.Count )) +
             geom_line(,colour="blue")+
             geom_point()+
             ggtitle("Population count")+
             labs(y = "Generation",x="Total fish population count")
+        })
         
+        output$BioMassAll = renderPlot({
+            plots2make()$ByGen %>%
+                gather(key = BiomassType,
+                       value = Biomass,
+                       -generation,-Population.Count)%>%
+            ggplot( aes(x = generation, y = Biomass,colour=BiomassType )) +
+                    geom_line()+
+                    geom_point()+
+                    ggtitle("Total Biomass of fish remaining for next generation")+
+                    labs(y = "Generation",x="Surviving fish biomass")
+                })
         
-        Biomass = data.frame(generation = 1:T, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) %>%
-            ggplot( aes(x = generation)) +
-            geom_line(aes( y = SurvivingBiomass ),colour="blue")+
-            geom_point(aes( y = SurvivingBiomass ))+
-            ggtitle("Total mass of fish remaining for next generation")+
-            labs(y = "Generation",x="Surviving fish biomass")
-        
-        Caughtmass = data.frame(generation = 1:T, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) %>%
-            ggplot( aes(x = generation)) +
-            geom_line(aes( y = CaughtBiomass ),colour="blue")+
-            geom_point(aes( y = CaughtBiomass ))+
-            ggtitle("Total mass of fish caught in the Gill-net in each time step")+
-            labs(y = "Generation",x="Biomass of caught fish")
-        
-        # output$DensPlot = renderPlot({DensPlot})
-        # output$PopPlot = renderPlot({PopPlot})
-        # output$Biomass = renderPlot({Biomass})    
-        ggarrange(DensPlot,PopPlot,Biomass, Caughtmass,nrow = 2,ncol=2)
-    })
+        # 
+        # output$Biomass = renderPlot({
+        #     plots2make()$ByGen%>%
+        #     ggplot( aes(x = generation)) +
+        #     geom_line(aes( y = SurvivingBiomass ),colour="blue")+
+        #     geom_point(aes( y = SurvivingBiomass ))+
+        #     ggtitle("Total mass of fish remaining for next generation")+
+        #     labs(y = "Generation",x="Surviving fish biomass")
+        # })
+        # 
+        # output$Caughtmass = renderPlot({
+        #     plots2make()$ByGen%>%
+        #     ggplot( aes(x = generation)) +
+        #     geom_line(aes( y = CaughtBiomass ),colour="blue")+
+        #     geom_point(aes( y = CaughtBiomass ))+
+        #     ggtitle("Total mass of fish caught in the Gill-net in each time step")+
+        #     labs(y = "Generation",x="Biomass of caught fish")
+        # })
+    
+    # })
     
 
 })
