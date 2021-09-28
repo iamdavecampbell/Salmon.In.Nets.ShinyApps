@@ -11,7 +11,9 @@ library(shiny)
 library(tidyverse)
 
 shinyServer(function(input, output) {
-
+  # include some dynamic text.  Here I get the server to produce text output
+  # and I use it to print the values within the ui using "textOutput"
+  #These are just inputs that are brought to the server and then rendered as part of the ui
     output$initialPopulationSize <- renderText({ input$initialPopulationSize })
     
     output$P.net.encounter <- renderText({ input$P.net.encounter })
@@ -20,7 +22,7 @@ shinyServer(function(input, output) {
     
     plots2make = reactive({
         N = input$initialPopulationSize # number of fish to start
-        T = input$generations # generaions
+        T = input$generations # generations
         FishSizeSD = 1        #sd for fish
         #512 is the default number of increments for density
         FishDensityThatWeKeep = matrix(NA, nrow=512,ncol=T, dimnames = list(NULL, paste("Gen",1:T,sep=".")))
@@ -52,10 +54,11 @@ shinyServer(function(input, output) {
             
         }
         # Add in the x values to go with the density
+        # instead of making a tibble then reshaping it, do it all in one shot.
         FishDensityThatWeKeep  = as_tibble(FishDensityThatWeKeep) %>% mutate(fishmass = density(LivingFishSize, from = 0, to = 10)$x)%>% 
-            gather(key = Generation,
-            value = DensityOfMass,
-          -fishmass)
+          pivot_longer(names_to = "Generation", # reshape the tibble for plotting
+                       values_to = "DensityOfMass",
+                       col = -fishmass)
         
         ByGen = data.frame(generation = 1:T, Population.Count = Npop, SurvivingBiomass=SurvivingBiomass, CaughtBiomass=CaughtBiomass) 
         

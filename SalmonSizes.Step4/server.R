@@ -5,7 +5,9 @@ library(shiny)
 library(tidyverse)
 
 shinyServer(function(input, output) {
-
+    # include some dynamic text.  Here I get the server to produce text output
+    # and I use it to print the values within the ui using "textOutput"
+    #These are just inputs that are brought to the server and then rendered as part of the ui
     output$initialPopulationSize <- renderText({ input$initialPopulationSize })
     
     output$P.net.encounter <- renderText({ input$P.net.encounter })
@@ -15,7 +17,7 @@ shinyServer(function(input, output) {
     
     output$distPlot <- renderPlot({
         N = input$initialPopulationSize # number of fish to start
-        T = input$generations # generaions
+        T = input$generations # generations
         FishSizeSD = 1        #sd for fish
         #512 is the default number of increments for density
         FishDensityThatWeKeep = matrix(NA, nrow=512,ncol=T, dimnames = list(NULL, paste("Gen",1:T,sep=".")))
@@ -40,18 +42,16 @@ shinyServer(function(input, output) {
         }
         # Add in the x values to go with the density
         FishDensityThatWeKeep  = as_tibble(FishDensityThatWeKeep) %>% mutate(fishmass = density(LivingFishSize, from = 0, to = 10)$x)
-
-        ylabel=c("Frequency","Density")
-        
-        FishDensityThatWeKeep %>% gather(key = Generation,
-                                                value = DensityOfMass,
-                                                -fishmass) %>%
+        ylabel=c("Frequency","Density") # sneaky trick to allow for the radio button selection of type of plot.  Define this and use it below for the label
+        FishDensityThatWeKeep %>% pivot_longer(names_to = "Generation", # reshape the tibble for plotting
+                                               values_to = "DensityOfMass",
+                                                col = -fishmass) %>%
             mutate(Generation = as.numeric(gsub(Generation,pattern = "Gen.",replacement = "")))%>%
         ggplot( aes(x = fishmass, y = DensityOfMass, colour = Generation )) +
             geom_point()+
             geom_vline(xintercept = input$NetSize, lwd=3,col="red")+
             ggtitle("Distribution of salmon weight in each generation after responding to Gill-net pressure")+
-            labs(y = ylabel[1+as.numeric(input$Density.Plot.Indicator)],x="weight of fish in lbs")
+            labs(y = ylabel[1+as.numeric(input$Density.Plot.Indicator)],x="weight of fish in lbs")# see above where ylabel is defined.
 
     })
 

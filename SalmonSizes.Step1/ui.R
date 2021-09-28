@@ -19,7 +19,7 @@ shinyUI(fluidPage(
     sidebarLayout(
         sidebarPanel(
             sliderInput("generations",
-                        "Generations Of Fish:",
+                        "Placeholder for Generations Of Fish (not yet functional):",
                         min = 1,
                         max = 20,
                         value = 1)

@@ -13,7 +13,7 @@ library(tidyverse)
 shinyServer(function(input, output) {
     output$distPlot <- renderPlot({
         N = 1000 # number of fish to start
-        T = 3 # generaions
+        T = 3 # generations
         P.net.encounter  = .5 #probability of encountering the net
         FishSizeSD = 1        #sd for fish
         NetSize = 6           #fish this size or larger get caught if they encounter the net
@@ -36,10 +36,10 @@ shinyServer(function(input, output) {
         }
         # Add in the x values to go with the density
         FishDensityThatWeKeep  = FishDensityThatWeKeep %>% mutate(fishmass = density(LivingFishSize, from = 0, to = 10)$x)
-        # NEW FUNCTION TO COMBINE DATASET FOR PLOTTING
-        FishDensityThatWeKeep %>% gather(key = Generation, 
-                                                value = DensityOfMass, 
-                                                -fishmass) %>%
+        # NEW FUNCTION TO RESHAPE DATASET FOR PLOTTING
+        FishDensityThatWeKeep %>% pivot_longer(names_to = Generation, # reshape the tibble for plotting
+                                                   values_to = DensityOfMass,
+                                                   col = -fishmass) %>%
         ggplot( aes(x = fishmass, y = DensityOfMass, colour = Generation )) +
             geom_point()
 

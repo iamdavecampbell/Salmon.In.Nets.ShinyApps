@@ -50,7 +50,8 @@ shinyUI(fluidPage(
         # Show the output of the simulations
         mainPanel(
             
-            
+            # include some dynamic text.  Here I get the server to produce text output
+            # and I use it to print the values within the page using "textOutput"
             p("Salmon, starting with an initial population of size"), textOutput("initialPopulationSize"),
             p("and size distribution (darkest line below), encounter gill-nets across a river with probability "), textOutput("P.net.encounter"),
             p("Some fish will swim around the nets, but some fish encounter the nets.  

@@ -48,7 +48,7 @@ shinyUI(fluidPage(
               Fish fry will be similar in size to their parents, but the size of the fry are random."),
             plotOutput("distPlot"),
             p("Notice how the distribution of fish sizes shrinks well below the gill-net size. Smaller fish are more successful against the nets."),
-            h3("limitations"),
+            h3("limitations"),# h1 is a big heading title, h2 is smaller, h3 is smaller,...
             p("Fish may have better survival rates in the ocean if they are larger, but the current model does not consider upwards pressure in size."),
             
             

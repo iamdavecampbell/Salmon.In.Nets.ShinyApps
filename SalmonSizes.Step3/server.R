@@ -13,7 +13,7 @@ library(tidyverse)
 shinyServer(function(input, output) {
     output$distPlot <- renderPlot({
         N = 1000 # number of fish to start
-        T = input$generations # generaions
+        T = input$generations # generations
         FishSizeSD = 1        #sd for fish
         #512 is the default number of increments for density
         FishDensityThatWeKeep = matrix(NA, nrow=512,ncol=T, dimnames = list(NULL, paste("Gen",1:T,sep=".")))
@@ -34,11 +34,10 @@ shinyServer(function(input, output) {
         }
         # Add in the x values to go with the density
         FishDensityThatWeKeep  = as_tibble(FishDensityThatWeKeep) %>% mutate(fishmass = density(LivingFishSize, from = 0, to = 10)$x)
-
-        FishDensityThatWeKeep %>% gather(key = Generation,
-                                                value = DensityOfMass,
-                                                -fishmass) %>%
-            mutate(Generation = as.numeric(gsub(Generation,pattern = "Gen.",replacement = "")))%>%
+        FishDensityThatWeKeep %>% pivot_longer(names_to = Generation, # reshape the tibble for plotting
+                                               values_to = DensityOfMass,
+                                               col = -fishmass) %>%
+        mutate(Generation = as.numeric(gsub(Generation,pattern = "Gen.",replacement = "")))%>% # to clean up the legend
         ggplot( aes(x = fishmass, y = DensityOfMass, colour = Generation )) +
             geom_point()+
             geom_vline(xintercept = input$NetSize, lwd=3,col="red")+
